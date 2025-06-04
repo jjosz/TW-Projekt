@@ -53,6 +53,9 @@ class TokenService {
             throw new Error('Error while removing token');
         }
     }
+public async getAllTokens() {
+       return await TokenModel.find({});
+   }
 }
 
 export default TokenService;

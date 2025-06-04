@@ -1,5 +1,6 @@
 import  UserModel  from '../schemas/user.schema';
 import {IUser} from "../models/user.model";
+import nodemailer from 'nodemailer';
 
 class UserService {
     public async createNewOrUpdate(user: IUser) {
@@ -35,6 +36,26 @@ class UserService {
             console.error('Wystąpił błąd podczas pobierania wszystkich użytkowników:', error);
             throw new Error('Wystąpił błąd podczas pobierania wszystkich użytkowników');
         }
+    }
+public async sendResetEmail(email: string, newPassword: string): Promise<void> {
+        const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'adres@gmail.com',
+                pass: 'haslo'
+            }
+        });
+
+        const mailOptions = {
+            from: '"PasswordService" <adres@gmail.com>',
+            to: email,
+            subject: 'Reset hasła',
+            text: `Hasło: ${newPassword}`
+        };
+
+        await transporter.sendMail(mailOptions);
     }
 }
 
