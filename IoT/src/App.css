@@ -1,0 +1,26 @@
+.value {
+   margin-left: 15px;
+}
+
+.logo {
+   background: url("assets/ki.jpg");
+   background-size: cover;
+   width: 4vh;
+   height: 4vh;
+   margin: 3px;
+}
+.card {
+    color:white;
+    backgroundColor: '#2c2c2c';
+    borderRadius: 2;
+    padding: 2;
+    width: 200px;
+    cursor: 'pointer';
+    border: '1px solid #444';
+    transition: '0.3s';
+
+}
+
+.card:hover {
+    borderColor: '#00bcd4';
+}

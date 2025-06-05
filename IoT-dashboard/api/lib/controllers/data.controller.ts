@@ -3,15 +3,15 @@ import { Request, Response, NextFunction, Router } from 'express';
 import {checkIdParam} from "../middlewares/deviceIdParam.middleware";
 import DataService from "../modules/services/data.service";
 import {config} from "../config";
+import Joi from "joi";
 
 let testArr = [4,5,6,3,5,3,7,5,13,5,6,4,3,6,3,6];
 
 class DataController implements Controller {
     public path = '/api/data';
     public router = Router();
-    public dataService = new DataService();
 
-    constructor() {
+    constructor(private dataService: DataService) {
         this.initializeRoutes();
     }
 
@@ -35,11 +35,24 @@ class DataController implements Controller {
         const { air } = request.body;
         const { id } = request.params;
 
+        const schema = Joi.object({
+            air: Joi.array()
+                .items(
+                    Joi.object({
+                        id: Joi.number().integer().positive().required(),
+                        value: Joi.number().positive().required()
+                    })
+                )
+                .unique((a, b) => a.id === b.id),
+            deviceId: Joi.number().integer().positive().valid(parseInt(id, 10)).required()
+        });
+        const validatedData = await schema.validateAsync({air,deviceId: parseInt(id,10)});
+
         const data = {
-            temperature: air[0].value,
-            pressure: air[1].value,
-            humidity: air[2].value,
-            deviceId: Number(id),
+            temperature: validatedData.air[0].value,
+            pressure: validatedData.air[1].value,
+            humidity: validatedData.air[2].value,
+            deviceId: validatedData.deviceId,
             readingDate : new Date()
         }
 
