@@ -1,9 +1,8 @@
-import express from 'express';
+import express, {NextFunction, Request, Response} from 'express';
 import { config } from './config';
 import Controller from "./interfaces/controller.interface";
-import bodyParser from 'body-parser';
-import morgan from 'morgan';
 import mongoose from 'mongoose';
+
 
 class App {
     public app: express.Application;
@@ -15,26 +14,22 @@ class App {
         this.connectToDatabase();
     }
 
+    private initializeMiddlewares(): void {
+        this.app.use(express.json());
+        this.app.use((req: Request, res: Response, next: NextFunction) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+            res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+            next();
+        });
+    }
+
     private initializeControllers(controllers: Controller[]): void {
         controllers.forEach((controller) => {
             this.app.use('/', controller.router);
         });
     }
-    private initializeMiddlewares(): void {
-        this.app.use(bodyParser.json());
-        //this.app.use(morgan('dev'));
-        this.app.use((req, res, next) => {
-            console.log(`[${req.method} ${req.url} ${new Date().toISOString()}]`);
-            next();
-        });
-    }
 
-
-    public listen(): void {
-        this.app.listen(config.port, () => {
-            console.log(`App listening on the port ${config.port}`);
-        });
-    }
     private async connectToDatabase(): Promise<void> {
         try {
             await mongoose.connect(config.databaseUrl);
@@ -61,6 +56,12 @@ class App {
             await mongoose.connection.close();
             console.log('MongoDB connection closed due to app termination');
             process.exit(0);
+        });
+    }
+
+    public listen(): void {
+        this.app.listen(config.port, () => {
+            console.log(`App listening on the port ${config.port}`);
         });
     }
 
